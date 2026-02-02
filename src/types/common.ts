@@ -236,7 +236,7 @@ export const richTextObjectSchema = {
 // Block object schema
 export const blockObjectSchema = {
   type: "object",
-  description: "A Notion block object. **LIMITS:** Max 2 nesting levels per request, max 100 blocks per request, rich_text max 2000 chars.",
+  description: "Notion block. **LIMITS:** 100 blocks, 2 nesting levels, 2000 chars.",
   properties: {
     object: {
       type: "string",
@@ -569,6 +569,47 @@ export const blockObjectSchema = {
       type: "object",
       description: "Divider block object.",
       properties: {},
+    },
+    table: {
+      type: "object",
+      description: "Table block. children must be table_row blocks with cells (array of rich_text arrays). Example cell: [[{type:'text',text:{content:'A'}}],[{type:'text',text:{content:'B'}}]]",
+      properties: {
+        table_width: {
+          type: "number",
+          description: "Number of columns. Must match cells count per row.",
+        },
+        has_column_header: {
+          type: "boolean",
+          description: "First row as header.",
+        },
+        has_row_header: {
+          type: "boolean",
+          description: "First column as header.",
+        },
+        children: {
+          type: "array",
+          description: "table_row blocks array.",
+          items: {
+            type: "object",
+            properties: {
+              type: { type: "string", enum: ["table_row"] },
+              table_row: {
+                type: "object",
+                properties: {
+                  cells: {
+                    type: "array",
+                    description: "Each cell = array of rich_text objects.",
+                    items: { type: "array" },
+                  },
+                },
+                required: ["cells"],
+              },
+            },
+            required: ["type", "table_row"],
+          },
+        },
+      },
+      required: ["table_width", "has_column_header", "children"],
     },
   },
   required: ["object", "type"],
