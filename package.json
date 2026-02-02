@@ -1,6 +1,6 @@
 {
   "name": "@suncreation/mcp-notion-server",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "MCP server for interacting with Notion API - forked and enhanced",
   "license": "MIT",
   "author": "SunCreation (https://github.com/SunCreation)",

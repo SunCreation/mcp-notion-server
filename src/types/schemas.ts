@@ -14,7 +14,7 @@ import {
 export const appendBlockChildrenTool: Tool = {
   name: "notion_append_block_children",
   description:
-    "Append new children blocks to a specified parent block in Notion. Requires insert content capabilities. You can optionally specify the 'after' parameter to append after a certain block.",
+    "Append new children blocks to a specified parent block in Notion. Requires insert content capabilities. You can optionally specify the 'after' parameter to append after a certain block.\n\n**LIMITS:** Max 100 blocks/request, max 2 nesting levels, rich_text max 2000 chars, URLs max 2000 chars. Split large content into multiple requests.",
   inputSchema: {
     type: "object",
     properties: {
@@ -121,7 +121,7 @@ export const updateBlockTool: Tool = {
 // Pages tools
 export const createPageTool: Tool = {
   name: "notion_create_page",
-  description: "Create a new page in Notion. The page can be created as a child of another page or inside a database.",
+  description: "Create a new page in Notion. The page can be created as a child of another page or inside a database.\n\n**LIMITS:** Max 100 blocks in children, max 2 nesting levels, rich_text max 2000 chars.",
   inputSchema: {
     type: "object",
     properties: {

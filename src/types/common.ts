@@ -33,7 +33,7 @@ export const richTextObjectSchema = {
       properties: {
         content: {
           type: "string",
-          description: "The actual text content.",
+          description: "The actual text content. **Max 2000 characters.**",
         },
         link: {
           type: "object",
@@ -236,7 +236,7 @@ export const richTextObjectSchema = {
 // Block object schema
 export const blockObjectSchema = {
   type: "object",
-  description: "A Notion block object.",
+  description: "A Notion block object. **LIMITS:** Max 2 nesting levels per request, max 100 blocks per request, rich_text max 2000 chars.",
   properties: {
     object: {
       type: "string",
