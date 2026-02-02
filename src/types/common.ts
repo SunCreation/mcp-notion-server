@@ -285,10 +285,15 @@ export const blockObjectSchema = {
         },
         children: {
           type: "array",
-          description: "Nested child blocks.",
+          description: "Nested child blocks. Each child must be a valid block object with 'object' and 'type' properties. Do NOT put text content here - use rich_text for content.",
           items: {
             type: "object",
-            description: "A nested block object.",
+            description: "A nested block object. Must have 'object': 'block' and a valid 'type' (e.g., 'paragraph', 'bulleted_list_item').",
+            properties: {
+              object: { type: "string", enum: ["block"] },
+              type: { type: "string" },
+            },
+            required: ["object", "type"],
           },
         },
       },
@@ -449,10 +454,15 @@ export const blockObjectSchema = {
         },
         children: {
           type: "array",
-          description: "Nested child blocks.",
+          description: "Nested child blocks. Each child must be a valid block object with 'object' and 'type' properties.",
           items: {
             type: "object",
-            description: "A nested block object.",
+            description: "A nested block object. Must have 'object': 'block' and a valid 'type'.",
+            properties: {
+              object: { type: "string", enum: ["block"] },
+              type: { type: "string" },
+            },
+            required: ["object", "type"],
           },
         },
       },
@@ -493,10 +503,15 @@ export const blockObjectSchema = {
         },
         children: {
           type: "array",
-          description: "Nested child blocks.",
+          description: "Nested child blocks. Each child must be a valid block object with 'object' and 'type' properties.",
           items: {
             type: "object",
-            description: "A nested block object.",
+            description: "A nested block object. Must have 'object': 'block' and a valid 'type'.",
+            properties: {
+              object: { type: "string", enum: ["block"] },
+              type: { type: "string" },
+            },
+            required: ["object", "type"],
           },
         },
       },
@@ -537,10 +552,15 @@ export const blockObjectSchema = {
         },
         children: {
           type: "array",
-          description: "Nested child blocks that are revealed when the toggle is opened.",
+          description: "Nested child blocks that are revealed when the toggle is opened. Each child must be a valid block object with 'object' and 'type' properties.",
           items: {
             type: "object",
-            description: "A nested block object.",
+            description: "A nested block object. Must have 'object': 'block' and a valid 'type'.",
+            properties: {
+              object: { type: "string", enum: ["block"] },
+              type: { type: "string" },
+            },
+            required: ["object", "type"],
           },
         },
       },
