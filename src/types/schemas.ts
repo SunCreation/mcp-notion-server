@@ -31,7 +31,7 @@ export const appendBlockChildrenTool: Tool = {
       after: {
         type: "string",
         description:
-          "Block ID to append after. **WARNING:** May append at page END instead. Reorder manually if needed." +
+          "Block ID to append after. New blocks will be inserted right after this block." +
           commonIdDescription,
       },
       format: formatParameter,

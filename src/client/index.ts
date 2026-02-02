@@ -66,9 +66,11 @@ export class NotionClientWrapper {
 
   async appendBlockChildren(
     block_id: string,
-    children: Partial<BlockResponse>[]
+    children: Partial<BlockResponse>[],
+    after?: string
   ): Promise<BlockResponse> {
-    const body = { children };
+    const body: Record<string, any> = { children };
+    if (after) body.after = after;
 
     const response = await fetch(
       `${this.baseUrl}/blocks/${block_id}/children`,

@@ -58,7 +58,8 @@ export async function startServer(
             }
             response = await notionClient.appendBlockChildren(
               args.block_id,
-              args.children
+              args.children,
+              args.after
             );
             break;
           }
