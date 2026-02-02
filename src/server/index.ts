@@ -110,6 +110,20 @@ export async function startServer(
             break;
           }
 
+          case "notion_create_page": {
+            const pageArgs = request.params
+              .arguments as unknown as args.CreatePageArgs;
+            if (!pageArgs.parent || !pageArgs.properties) {
+              throw new Error("Missing required arguments: parent and properties");
+            }
+            response = await notionClient.createPage(
+              pageArgs.parent,
+              pageArgs.properties,
+              pageArgs.children
+            );
+            break;
+          }
+
           case "notion_retrieve_page": {
             const args = request.params
               .arguments as unknown as args.RetrievePageArgs;
@@ -306,6 +320,7 @@ export async function startServer(
       schemas.retrieveBlockChildrenTool,
       schemas.deleteBlockTool,
       schemas.updateBlockTool,
+      schemas.createPageTool,
       schemas.retrievePageTool,
       schemas.updatePagePropertiesTool,
       schemas.listAllUsersTool,

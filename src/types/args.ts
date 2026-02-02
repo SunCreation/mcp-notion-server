@@ -36,6 +36,13 @@ export interface UpdateBlockArgs {
 }
 
 // Pages
+export interface CreatePageArgs {
+  parent: { database_id?: string; page_id?: string };
+  properties: Record<string, any>;
+  children?: Partial<BlockResponse>[];
+  format?: "json" | "markdown";
+}
+
 export interface RetrievePageArgs {
   page_id: string;
   format?: "json" | "markdown";

@@ -14,7 +14,7 @@ import {
   RichTextItemResponse,
   CreateDatabaseArgs,
 } from "../types/index.js";
-import fetch from "node-fetch";
+import fetch, { Response as NodeFetchResponse } from "node-fetch";
 
 export class NotionClientWrapper {
   private notionToken: string;
@@ -28,6 +28,40 @@ export class NotionClientWrapper {
       "Content-Type": "application/json",
       "Notion-Version": "2022-06-28",
     };
+  }
+
+  setApiVersion(version: string) {
+    this.headers["Notion-Version"] = version;
+  }
+
+  private async handleResponse<T>(response: NodeFetchResponse): Promise<T> {
+    const data = await response.json();
+    
+    if (!response.ok) {
+      const errorMessage = (data as any).message || (data as any).code || `HTTP ${response.status}`;
+      throw new Error(`Notion API Error (${response.status}): ${errorMessage}`);
+    }
+    
+    return data as T;
+  }
+
+  async createPage(
+    parent: { database_id?: string; page_id?: string },
+    properties: Record<string, any>,
+    children?: Partial<BlockResponse>[]
+  ): Promise<PageResponse> {
+    const body: Record<string, any> = { parent, properties };
+    if (children && children.length > 0) {
+      body.children = children;
+    }
+
+    const response = await fetch(`${this.baseUrl}/pages`, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify(body),
+    });
+
+    return this.handleResponse<PageResponse>(response);
   }
 
   async appendBlockChildren(

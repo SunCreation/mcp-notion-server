@@ -39,12 +39,12 @@ if (process.env.NODE_ENV !== "test" && process.env.VITEST !== "true") {
 }
 
 async function main() {
-  const notionToken = process.env.NOTION_API_TOKEN;
+  const notionToken = process.env.NOTION_API_TOKEN || process.env.NOTION_API_KEY;
   const enableMarkdownConversion =
     process.env.NOTION_MARKDOWN_CONVERSION === "true";
 
   if (!notionToken) {
-    console.error("Please set NOTION_API_TOKEN environment variable");
+    console.error("Please set NOTION_API_TOKEN or NOTION_API_KEY environment variable");
     process.exit(1);
   }
 

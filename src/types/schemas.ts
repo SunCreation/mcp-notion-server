@@ -119,6 +119,41 @@ export const updateBlockTool: Tool = {
 };
 
 // Pages tools
+export const createPageTool: Tool = {
+  name: "notion_create_page",
+  description: "Create a new page in Notion. The page can be created as a child of another page or inside a database.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      parent: {
+        type: "object",
+        description: "Parent of the page. Specify either page_id (to create a subpage) or database_id (to create a database item).",
+        properties: {
+          page_id: {
+            type: "string",
+            description: "The ID of the parent page." + commonIdDescription,
+          },
+          database_id: {
+            type: "string",
+            description: "The ID of the parent database." + commonIdDescription,
+          },
+        },
+      },
+      properties: {
+        type: "object",
+        description: "Page properties. For pages with a page parent, use 'title' property. For database items, match the database schema.",
+      },
+      children: {
+        type: "array",
+        description: "Page content as an array of block objects.",
+        items: blockObjectSchema,
+      },
+      format: formatParameter,
+    },
+    required: ["parent", "properties"],
+  },
+};
+
 export const retrievePageTool: Tool = {
   name: "notion_retrieve_page",
   description: "Retrieve a page from Notion",
