@@ -599,7 +599,7 @@ export const blockObjectSchema = {
                   cells: {
                     type: "array",
                     description: "Each cell = array of rich_text objects.",
-                    items: { type: "array" },
+                    items: { type: "array", items: { type: "object" } },
                   },
                 },
                 required: ["cells"],
