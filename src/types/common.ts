@@ -1,163 +1,112 @@
-/**
- * Common schema definitions for Notion tools
- */
+export const commonIdDescription = " Format: 8-4-4-4-12 with hyphens.";
 
-// Common ID description
-export const commonIdDescription =
-  "It should be a 32-character string (excluding hyphens) formatted as 8-4-4-4-12 with hyphens (-).";
-
-// Format parameter schema
 export const formatParameter = {
   type: "string",
   enum: ["json", "markdown"],
   description:
-    "Specify the response format. 'json' returns the original data structure, 'markdown' returns a more readable format. Use 'markdown' when the user only needs to read the page and isn't planning to write or modify it. Use 'json' when the user needs to read the page with the intention of writing to or modifying it.",
+    "Response format. 'json' for raw data, 'markdown' for readable output. Use 'json' when planning to write/modify.",
   default: "markdown",
 };
 
-// Rich text object schema
+const colorDesc = "Color: default, blue, brown, gray, green, orange, pink, purple, red, yellow (+ _background variants).";
+
+const nestedBlockChildItem = {
+  type: "object",
+  properties: {
+    object: { type: "string", enum: ["block"] },
+    type: { type: "string" },
+  },
+  required: ["object", "type"],
+};
+
 export const richTextObjectSchema = {
   type: "object",
   description: "A rich text object.",
   properties: {
     type: {
       type: "string",
-      description:
-        "The type of this rich text object. Possible values: text, mention, equation.",
-      enum: ["text", "mention", "equation"],
+      description: "Rich text type: text or mention.",
+      enum: ["text", "mention"],
     },
     text: {
       type: "object",
-      description:
-        "Object containing text content and optional link info. Required if type is 'text'.",
+      description: "Text content + optional link. Required if type is 'text'.",
       properties: {
         content: {
           type: "string",
-          description: "The actual text content. **Max 2000 characters.**",
+          description: "Text content. Max 2000 chars.",
         },
         link: {
           type: "object",
-          description: "Optional link object with a 'url' field. Do NOT provide a NULL value, just ignore this field no link.",
+          description: "Optional link. Omit field entirely if no link.",
           properties: {
-            url: {
-              type: "string",
-              description: "The URL the text links to.",
-            },
+            url: { type: "string", description: "URL the text links to." },
           },
         },
       },
     },
     mention: {
       type: "object",
-      description:
-        "Mention object if type is 'mention'. Represents an inline mention of a database, date, link preview, page, template mention, or user.",
+      description: "Inline mention of a database, date, page, or user.",
       properties: {
         type: {
           type: "string",
-          description: "The type of the mention.",
-          enum: [
-            "database",
-            "date",
-            "link_preview",
-            "page",
-            "template_mention",
-            "user",
-          ],
+          description: "Mention type.",
+          enum: ["database", "date", "page", "user"],
         },
         database: {
           type: "object",
-          description:
-            "Database mention object. Contains a database reference with an 'id' field.",
+          description: "Database mention.",
           properties: {
             id: {
               type: "string",
-              description:
-                "The ID of the mentioned database." + commonIdDescription,
+              description: "Database ID." + commonIdDescription,
             },
           },
           required: ["id"],
         },
         date: {
           type: "object",
-          description:
-            "Date mention object, containing a date property value object.",
+          description: "Date mention.",
           properties: {
             start: {
               type: "string",
-              description: "An ISO 8601 formatted start date or date-time.",
+              description: "ISO 8601 start date/datetime.",
             },
             end: {
               type: ["string", "null"],
-              description:
-                "An ISO 8601 formatted end date or date-time, or null if not a range.",
+              description: "ISO 8601 end date/datetime, or null.",
             },
             time_zone: {
               type: ["string", "null"],
-              description:
-                "Time zone information for start and end. If null, times are in UTC.",
+              description: "Time zone. Null = UTC.",
             },
           },
           required: ["start"],
         },
-        link_preview: {
-          type: "object",
-          description:
-            "Link Preview mention object, containing a URL for the link preview.",
-          properties: {
-            url: {
-              type: "string",
-              description: "The URL for the link preview.",
-            },
-          },
-          required: ["url"],
-        },
         page: {
           type: "object",
-          description:
-            "Page mention object, containing a page reference with an 'id' field.",
+          description: "Page mention.",
           properties: {
             id: {
               type: "string",
-              description:
-                "The ID of the mentioned page." + commonIdDescription,
+              description: "Page ID." + commonIdDescription,
             },
           },
           required: ["id"],
         },
-        template_mention: {
-          type: "object",
-          description:
-            "Template mention object, can be a template_mention_date or template_mention_user.",
-          properties: {
-            type: {
-              type: "string",
-              enum: ["template_mention_date", "template_mention_user"],
-              description: "The template mention type.",
-            },
-            template_mention_date: {
-              type: "string",
-              enum: ["today", "now"],
-              description: "For template_mention_date type, the date keyword.",
-            },
-            template_mention_user: {
-              type: "string",
-              enum: ["me"],
-              description: "For template_mention_user type, the user keyword.",
-            },
-          },
-        },
         user: {
           type: "object",
-          description: "User mention object, contains a user reference.",
+          description: "User mention.",
           properties: {
             object: {
               type: "string",
-              description: "Should be 'user'.",
+              description: "Must be 'user'.",
               enum: ["user"],
             },
             id: {
               type: "string",
-              description: "The ID of the user." + commonIdDescription,
+              description: "User ID." + commonIdDescription,
             },
           },
           required: ["object", "id"],
@@ -167,416 +116,176 @@ export const richTextObjectSchema = {
       oneOf: [
         { required: ["database"] },
         { required: ["date"] },
-        { required: ["link_preview"] },
         { required: ["page"] },
-        { required: ["template_mention"] },
         { required: ["user"] },
       ],
     },
-    equation: {
-      type: "object",
-      description:
-        "Equation object if type is 'equation'. Represents an inline LaTeX equation.",
-      properties: {
-        expression: {
-          type: "string",
-          description: "LaTeX string representing the inline equation.",
-        },
-      },
-      required: ["expression"],
-    },
     annotations: {
       type: "object",
-      description: "Styling information for the text. By default, give nothing for default text.",
+      description: "Text styling. Omit for default text.",
       properties: {
         bold: { type: "boolean" },
         italic: { type: "boolean" },
         strikethrough: { type: "boolean" },
         underline: { type: "boolean" },
         code: { type: "boolean" },
-        color: {
-          type: "string",
-          description: "Color for the text.",
-          enum: [
-            "default",
-            "blue",
-            "blue_background",
-            "brown",
-            "brown_background",
-            "gray",
-            "gray_background",
-            "green",
-            "green_background",
-            "orange",
-            "orange_background",
-            "pink",
-            "pink_background",
-            "purple",
-            "purple_background",
-            "red",
-            "red_background",
-            "yellow",
-            "yellow_background",
-          ],
-        },
+        color: { type: "string", description: colorDesc },
       },
     },
     href: {
       type: "string",
-      description: "The URL of any link or mention in this text, if any. Do NOT provide a NULL value, just ignore this field if there is no link or mention.",
+      description: "Link URL if any. Omit if none.",
     },
     plain_text: {
       type: "string",
-      description: "The plain text without annotations.",
+      description: "Plain text without annotations.",
     },
   },
   required: ["type"],
 };
 
-// Block object schema
 export const blockObjectSchema = {
   type: "object",
-  description: "Notion block. **LIMITS:** 100 blocks, 2 nesting levels, 2000 chars.",
+  description: "Notion block. Max 100 blocks, 2 nesting levels, 2000 chars.",
   properties: {
     object: {
       type: "string",
-      description: "Should be 'block'.",
+      description: "Must be 'block'.",
       enum: ["block"],
     },
     type: {
       type: "string",
       description:
-        "Type of the block. Possible values include 'paragraph', 'heading_1', 'heading_2', 'heading_3', 'bulleted_list_item', 'numbered_list_item', 'to_do', 'toggle', 'child_page', 'child_database', 'embed', 'callout', 'quote', 'equation', 'divider', 'table_of_contents', 'column', 'column_list', 'link_preview', 'synced_block', 'template', 'link_to_page', 'audio', 'bookmark', 'breadcrumb', 'code', 'file', 'image', 'pdf', 'video'. Not all types are supported for creation via API.",
+        "Block type: paragraph, heading_1, heading_2, heading_3, bulleted_list_item, numbered_list_item, to_do, toggle, divider, table, callout, quote, code, image, bookmark, embed, etc.",
     },
     paragraph: {
       type: "object",
-      description: "Paragraph block object.",
+      description: "Paragraph block.",
       properties: {
         rich_text: {
           type: "array",
-          description:
-            "Array of rich text objects representing the comment content.",
+          description: "Paragraph content as rich text array.",
           items: richTextObjectSchema,
         },
-        color: {
-          type: "string",
-          description: "The color of the block.",
-          enum: [
-            "default",
-            "blue",
-            "blue_background",
-            "brown",
-            "brown_background",
-            "gray",
-            "gray_background",
-            "green",
-            "green_background",
-            "orange",
-            "orange_background",
-            "pink",
-            "pink_background",
-            "purple",
-            "purple_background",
-            "red",
-            "red_background",
-            "yellow",
-            "yellow_background",
-          ],
-        },
+        color: { type: "string", description: colorDesc },
         children: {
           type: "array",
-          description: "Nested child blocks. Each child must be a valid block object with 'object' and 'type' properties. Do NOT put text content here - use rich_text for content.",
-          items: {
-            type: "object",
-            description: "A nested block object. Must have 'object': 'block' and a valid 'type' (e.g., 'paragraph', 'bulleted_list_item').",
-            properties: {
-              object: { type: "string", enum: ["block"] },
-              type: { type: "string" },
-            },
-            required: ["object", "type"],
-          },
+          description: "Nested child blocks.",
+          items: nestedBlockChildItem,
         },
       },
     },
     heading_1: {
       type: "object",
-      description: "Heading 1 block object.",
+      description: "Heading 1 block.",
       properties: {
         rich_text: {
           type: "array",
-          description: "Array of rich text objects representing the heading content.",
+          description: "Heading content.",
           items: richTextObjectSchema,
         },
-        color: {
-          type: "string",
-          description: "The color of the block.",
-          enum: [
-            "default",
-            "blue",
-            "blue_background",
-            "brown",
-            "brown_background",
-            "gray",
-            "gray_background",
-            "green",
-            "green_background",
-            "orange",
-            "orange_background",
-            "pink",
-            "pink_background",
-            "purple",
-            "purple_background",
-            "red",
-            "red_background",
-            "yellow",
-            "yellow_background",
-          ],
-        },
+        color: { type: "string", description: colorDesc },
         is_toggleable: {
           type: "boolean",
-          description: "Whether the heading can be toggled.",
+          description: "Whether heading is toggleable.",
         },
       },
     },
     heading_2: {
       type: "object",
-      description: "Heading 2 block object.",
+      description: "Heading 2 block.",
       properties: {
         rich_text: {
           type: "array",
-          description: "Array of rich text objects representing the heading content.",
+          description: "Heading content.",
           items: richTextObjectSchema,
         },
-        color: {
-          type: "string",
-          description: "The color of the block.",
-          enum: [
-            "default",
-            "blue",
-            "blue_background",
-            "brown",
-            "brown_background",
-            "gray",
-            "gray_background",
-            "green",
-            "green_background",
-            "orange",
-            "orange_background",
-            "pink",
-            "pink_background",
-            "purple",
-            "purple_background",
-            "red",
-            "red_background",
-            "yellow",
-            "yellow_background",
-          ],
-        },
+        color: { type: "string", description: colorDesc },
         is_toggleable: {
           type: "boolean",
-          description: "Whether the heading can be toggled.",
+          description: "Whether heading is toggleable.",
         },
       },
     },
     heading_3: {
       type: "object",
-      description: "Heading 3 block object.",
+      description: "Heading 3 block.",
       properties: {
         rich_text: {
           type: "array",
-          description: "Array of rich text objects representing the heading content.",
+          description: "Heading content.",
           items: richTextObjectSchema,
         },
-        color: {
-          type: "string",
-          description: "The color of the block.",
-          enum: [
-            "default",
-            "blue",
-            "blue_background",
-            "brown",
-            "brown_background",
-            "gray",
-            "gray_background",
-            "green",
-            "green_background",
-            "orange",
-            "orange_background",
-            "pink",
-            "pink_background",
-            "purple",
-            "purple_background",
-            "red",
-            "red_background",
-            "yellow",
-            "yellow_background",
-          ],
-        },
+        color: { type: "string", description: colorDesc },
         is_toggleable: {
           type: "boolean",
-          description: "Whether the heading can be toggled.",
+          description: "Whether heading is toggleable.",
         },
       },
     },
     bulleted_list_item: {
       type: "object",
-      description: "Bulleted list item block object.",
+      description: "Bulleted list item.",
       properties: {
         rich_text: {
           type: "array",
-          description: "Array of rich text objects representing the list item content.",
+          description: "List item content.",
           items: richTextObjectSchema,
         },
-        color: {
-          type: "string",
-          description: "The color of the block.",
-          enum: [
-            "default",
-            "blue",
-            "blue_background",
-            "brown",
-            "brown_background",
-            "gray",
-            "gray_background",
-            "green",
-            "green_background",
-            "orange",
-            "orange_background",
-            "pink",
-            "pink_background",
-            "purple",
-            "purple_background",
-            "red",
-            "red_background",
-            "yellow",
-            "yellow_background",
-          ],
-        },
+        color: { type: "string", description: colorDesc },
         children: {
           type: "array",
-          description: "Nested child blocks. Each child must be a valid block object with 'object' and 'type' properties.",
-          items: {
-            type: "object",
-            description: "A nested block object. Must have 'object': 'block' and a valid 'type'.",
-            properties: {
-              object: { type: "string", enum: ["block"] },
-              type: { type: "string" },
-            },
-            required: ["object", "type"],
-          },
+          description: "Nested child blocks.",
+          items: nestedBlockChildItem,
         },
       },
     },
     numbered_list_item: {
       type: "object",
-      description: "Numbered list item block object.",
+      description: "Numbered list item.",
       properties: {
         rich_text: {
           type: "array",
-          description: "Array of rich text objects representing the list item content.",
+          description: "List item content.",
           items: richTextObjectSchema,
         },
-        color: {
-          type: "string",
-          description: "The color of the block.",
-          enum: [
-            "default",
-            "blue",
-            "blue_background",
-            "brown",
-            "brown_background",
-            "gray",
-            "gray_background",
-            "green",
-            "green_background",
-            "orange",
-            "orange_background",
-            "pink",
-            "pink_background",
-            "purple",
-            "purple_background",
-            "red",
-            "red_background",
-            "yellow",
-            "yellow_background",
-          ],
-        },
+        color: { type: "string", description: colorDesc },
         children: {
           type: "array",
-          description: "Nested child blocks. Each child must be a valid block object with 'object' and 'type' properties.",
-          items: {
-            type: "object",
-            description: "A nested block object. Must have 'object': 'block' and a valid 'type'.",
-            properties: {
-              object: { type: "string", enum: ["block"] },
-              type: { type: "string" },
-            },
-            required: ["object", "type"],
-          },
+          description: "Nested child blocks.",
+          items: nestedBlockChildItem,
         },
       },
     },
     toggle: {
       type: "object",
-      description: "Toggle block object.",
+      description: "Toggle block.",
       properties: {
         rich_text: {
           type: "array",
-          description: "Array of rich text objects representing the toggle content.",
+          description: "Toggle content.",
           items: richTextObjectSchema,
         },
-        color: {
-          type: "string",
-          description: "The color of the block.",
-          enum: [
-            "default",
-            "blue",
-            "blue_background",
-            "brown",
-            "brown_background",
-            "gray",
-            "gray_background",
-            "green",
-            "green_background",
-            "orange",
-            "orange_background",
-            "pink",
-            "pink_background",
-            "purple",
-            "purple_background",
-            "red",
-            "red_background",
-            "yellow",
-            "yellow_background",
-          ],
-        },
+        color: { type: "string", description: colorDesc },
         children: {
           type: "array",
-          description: "Nested child blocks that are revealed when the toggle is opened. Each child must be a valid block object with 'object' and 'type' properties.",
-          items: {
-            type: "object",
-            description: "A nested block object. Must have 'object': 'block' and a valid 'type'.",
-            properties: {
-              object: { type: "string", enum: ["block"] },
-              type: { type: "string" },
-            },
-            required: ["object", "type"],
-          },
+          description: "Nested child blocks revealed when opened.",
+          items: nestedBlockChildItem,
         },
       },
     },
     divider: {
       type: "object",
-      description: "Divider block object.",
+      description: "Divider block.",
       properties: {},
     },
     table: {
       type: "object",
-      description: "Table block. children must be table_row blocks with cells (array of rich_text arrays). Example cell: [[{type:'text',text:{content:'A'}}],[{type:'text',text:{content:'B'}}]]",
+      description: "Table block. Children must be table_row blocks with cells (array of rich_text arrays).",
       properties: {
         table_width: {
           type: "number",
-          description: "Number of columns. Must match cells count per row.",
+          description: "Column count. Must match cells per row.",
         },
         has_column_header: {
           type: "boolean",
@@ -588,7 +297,7 @@ export const blockObjectSchema = {
         },
         children: {
           type: "array",
-          description: "table_row blocks array.",
+          description: "table_row blocks.",
           items: {
             type: "object",
             properties: {
