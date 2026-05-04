@@ -1,7 +1,7 @@
 {
   "name": "@suncreation/mcp-notion-server",
-  "version": "1.0.8",
-  "description": "MCP server for interacting with Notion API - forked and enhanced",
+  "version": "2.0.0",
+  "description": "MCP server for interacting with Notion API - SDK-based with caching, auto-pagination, and table management",
   "license": "MIT",
   "author": "SunCreation (https://github.com/SunCreation)",
   "type": "module",
@@ -23,12 +23,11 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.2",
-    "node-fetch": "^2.7.0",
+    "@notionhq/client": "^5.20.0",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
-    "@types/node-fetch": "^2.6.12",
     "@types/yargs": "^17.0.33",
     "typescript": "^5.3.3",
     "vitest": "^3.0.9"
