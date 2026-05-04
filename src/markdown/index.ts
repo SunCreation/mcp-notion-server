@@ -32,7 +32,7 @@ export function convertToMarkdown(response: NotionResponse): string {
       return convertListToMarkdown(response as ListResponse);
     default:
       // Return JSON string if conversion is not possible
-      return `\`\`\`json\n${JSON.stringify(response, null, 2)}\n\`\`\``;
+        return `\`\`\`json\n${JSON.stringify(response)}\n\`\`\``;
   }
 }
 
@@ -51,12 +51,6 @@ function convertPageToMarkdown(page: PageResponse): string {
   // Display page properties as a Markdown table
   markdown += convertPropertiesToMarkdown(page.properties);
 
-  // Include additional information if there are child blocks
-  markdown +=
-    "\n\n> This page contains child blocks. You can retrieve them using `retrieveBlockChildren`.\n";
-  markdown += `> Block ID: \`${page.id}\`\n`;
-
-  // Add link to view the page in Notion
   if (page.url) {
     markdown += `\n[View in Notion](${page.url})\n`;
   }
@@ -253,7 +247,7 @@ function convertListToMarkdown(list: ListResponse): string {
         break;
 
       default:
-        markdown += `\`\`\`json\n${JSON.stringify(item, null, 2)}\n\`\`\`\n\n`;
+        markdown += `\`\`\`json\n${JSON.stringify(item)}\n\`\`\`\n\n`;
     }
   }
 
