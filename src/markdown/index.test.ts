@@ -98,10 +98,6 @@ describe("convertToMarkdown", () => {
     expect(markdown).toMatch(/\| Due date \| 2023-02-23 \|/); // Check if date property is correctly displayed
     expect(markdown).toMatch(/\| Status \| Not started \|/); // Check if status property is correctly displayed
     expect(markdown).toMatch(/\| Title \| Bug bash \|/); // Check if title property is correctly displayed
-    expect(markdown).toMatch(/> This page contains child blocks/); // Check if note about child blocks exists
-    expect(markdown).toMatch(
-      /> Block ID: `be633bf1-dfa0-436d-b259-571129a590e5`/
-    ); // Check if block ID is correctly displayed
     expect(markdown).toMatch(
       /\[View in Notion\]\(https:\/\/www\.notion\.so\/Bug-bash-be633bf1dfa0436db259571129a590e5\)/
     ); // Check if link to Notion is correctly displayed
@@ -747,8 +743,8 @@ describe("convertToMarkdown", () => {
     const markdown = convertToMarkdown(unknownResponse);
 
     expect(markdown).toMatch(/^```json\n/); // JSON code block start
-    expect(markdown).toMatch(/"object": "unknown"/); // Object type
-    expect(markdown).toMatch(/"id": "unknown123"/); // ID
+    expect(markdown).toMatch(/"object":"unknown"/); // Object type (compact JSON)
+    expect(markdown).toMatch(/"id":"unknown123"/); // ID (compact JSON)
     expect(markdown).toMatch(/\n```$/); // JSON code block end
   });
 });

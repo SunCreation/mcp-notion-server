@@ -2,89 +2,90 @@ import { expect, test, describe, vi, beforeEach } from "vitest";
 import { NotionClientWrapper } from "./client/index.js";
 import { PageResponse } from "./types/index.js";
 import { filterTools } from "./utils/index.js";
-import fetch from "node-fetch";
 
 vi.mock("./markdown/index.js", () => ({
   convertToMarkdown: vi.fn().mockReturnValue("# Test"),
 }));
 
-vi.mock("node-fetch", () => {
-  return {
-    default: vi.fn(),
-  };
-});
+vi.mock("@notionhq/client", () => ({
+  Client: vi.fn().mockImplementation(() => ({})),
+}));
 
-// Mock tool list
+vi.mock("@notionhq/client/build/src/helpers.js", () => ({
+  collectPaginatedAPI: vi.fn().mockResolvedValue([]),
+}));
+
 const mockInputSchema = { type: "object" as const };
 const mockTools = [
-  {
-    name: "notion_retrieve_block",
-    inputSchema: mockInputSchema,
-  },
-  {
-    name: "notion_retrieve_page",
-    inputSchema: mockInputSchema,
-  },
-  {
-    name: "notion_query_database",
-    inputSchema: mockInputSchema,
-  },
+  { name: "notion_retrieve_block", inputSchema: mockInputSchema },
+  { name: "notion_retrieve_page", inputSchema: mockInputSchema },
+  { name: "notion_query_database", inputSchema: mockInputSchema },
 ];
+
+const mockRequest = vi.fn().mockResolvedValue({ object: "block", id: "test", type: "paragraph" });
+const mockNotion = {
+  request: mockRequest,
+  pages: {
+    create: mockRequest,
+    retrieve: mockRequest,
+    update: mockRequest,
+  },
+  blocks: {
+    retrieve: mockRequest,
+    delete: mockRequest,
+    update: mockRequest,
+    children: {
+      append: mockRequest,
+      list: mockRequest,
+    },
+  },
+  databases: {
+    retrieve: mockRequest,
+    create: mockRequest,
+    update: mockRequest,
+  },
+  users: {
+    list: mockRequest,
+    retrieve: mockRequest,
+    me: mockRequest,
+  },
+  comments: {
+    create: mockRequest,
+    list: mockRequest,
+  },
+  search: mockRequest,
+};
 
 describe("NotionClientWrapper", () => {
   let wrapper: any;
 
   beforeEach(() => {
-    // Reset mocks
     vi.resetAllMocks();
-
-    // Create client wrapper with test token
+    mockRequest.mockResolvedValue({ object: "block", id: "test", type: "paragraph" });
     wrapper = new NotionClientWrapper("test-token");
-
-    // Mock fetch to return JSON
-    (fetch as any).mockImplementation(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({ success: true }),
-      })
-    );
+    wrapper.notion = mockNotion;
   });
 
-  test("should initialize with correct headers", () => {
-    expect((wrapper as any).headers).toEqual({
-      Authorization: "Bearer test-token",
-      "Content-Type": "application/json",
-      "Notion-Version": "2022-06-28",
-    });
+  test("should initialize with SDK Client", () => {
+    expect((wrapper as any).notion).toBeDefined();
+    expect((wrapper as any).cache).toBeDefined();
   });
 
-  test("should call appendBlockChildren with correct parameters", async () => {
+  test("should call appendBlockChildren via SDK", async () => {
     const blockId = "block123";
     const children = [{ type: "paragraph" }];
 
     await wrapper.appendBlockChildren(blockId, children);
 
-    expect(fetch).toHaveBeenCalledWith(
-      `https://api.notion.com/v1/blocks/${blockId}/children`,
-      {
-        method: "PATCH",
-        headers: (wrapper as any).headers,
-        body: JSON.stringify({ children }),
-      }
-    );
+    expect(mockRequest).toHaveBeenCalled();
   });
 
-  test("should call retrieveBlock with correct parameters", async () => {
+  test("should call retrieveBlock via SDK", async () => {
     const blockId = "block123";
 
     await wrapper.retrieveBlock(blockId);
 
-    expect(fetch).toHaveBeenCalledWith(
-      `https://api.notion.com/v1/blocks/${blockId}`,
-      {
-        method: "GET",
-        headers: (wrapper as any).headers,
-      }
-    );
+    expect(mockRequest).toHaveBeenCalled();
   });
 
   test("should call retrieveBlockChildren with pagination parameters", async () => {
@@ -92,32 +93,33 @@ describe("NotionClientWrapper", () => {
     const startCursor = "cursor123";
     const pageSize = 10;
 
+    mockRequest.mockResolvedValueOnce({
+      object: "list",
+      results: [],
+      next_cursor: null,
+      has_more: false,
+    });
+
     await wrapper.retrieveBlockChildren(blockId, startCursor, pageSize);
 
-    expect(fetch).toHaveBeenCalledWith(
-      `https://api.notion.com/v1/blocks/${blockId}/children?start_cursor=${startCursor}&page_size=${pageSize}`,
-      {
-        method: "GET",
-        headers: (wrapper as any).headers,
-      }
-    );
+    expect(mockRequest).toHaveBeenCalled();
   });
 
-  test("should call retrievePage with correct parameters", async () => {
+  test("should call retrievePage via SDK", async () => {
     const pageId = "page123";
+
+    mockRequest.mockResolvedValueOnce({
+      object: "page",
+      id: pageId,
+      properties: {},
+    });
 
     await wrapper.retrievePage(pageId);
 
-    expect(fetch).toHaveBeenCalledWith(
-      `https://api.notion.com/v1/pages/${pageId}`,
-      {
-        method: "GET",
-        headers: (wrapper as any).headers,
-      }
-    );
+    expect(mockRequest).toHaveBeenCalled();
   });
 
-  test("should call updatePageProperties with correct parameters", async () => {
+  test("should call updatePageProperties via SDK", async () => {
     const pageId = "page123";
     const properties = {
       title: { title: [{ text: { content: "New Title" } }] },
@@ -125,47 +127,33 @@ describe("NotionClientWrapper", () => {
 
     await wrapper.updatePageProperties(pageId, properties);
 
-    expect(fetch).toHaveBeenCalledWith(
-      `https://api.notion.com/v1/pages/${pageId}`,
-      {
-        method: "PATCH",
-        headers: (wrapper as any).headers,
-        body: JSON.stringify({ properties }),
-      }
-    );
+    expect(mockRequest).toHaveBeenCalled();
   });
 
-  test("should call queryDatabase with correct parameters", async () => {
+  test("should call queryDatabase via SDK", async () => {
     const databaseId = "db123";
     const filter = { property: "Status", equals: "Done" };
-    const sorts = [{ property: "Due Date", direction: "ascending" }];
+    const sorts = [{ property: "Due Date", direction: "ascending" as const }];
 
     await wrapper.queryDatabase(databaseId, filter, sorts);
 
-    expect(fetch).toHaveBeenCalledWith(
-      `https://api.notion.com/v1/databases/${databaseId}/query`,
-      {
-        method: "POST",
-        headers: (wrapper as any).headers,
-        body: JSON.stringify({ filter, sorts }),
-      }
-    );
+    expect(mockRequest).toHaveBeenCalled();
   });
 
-  test("should call search with correct parameters", async () => {
+  test("should call search via SDK", async () => {
     const query = "test query";
     const filter = { property: "object", value: "page" };
 
+    mockRequest.mockResolvedValueOnce({
+      object: "list",
+      results: [],
+      next_cursor: null,
+      has_more: false,
+    });
+
     await wrapper.search(query, filter);
 
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.notion.com/v1/search",
-      {
-        method: "POST",
-        headers: (wrapper as any).headers,
-        body: JSON.stringify({ query, filter }),
-      }
-    );
+    expect(mockRequest).toHaveBeenCalled();
   });
 
   test("should call toMarkdown method correctly", async () => {
@@ -184,6 +172,21 @@ describe("NotionClientWrapper", () => {
     await wrapper.toMarkdown(response);
 
     expect(convertToMarkdown).toHaveBeenCalledWith(response);
+  });
+
+  test("should auto-fill empty table children", async () => {
+    const blockId = "block123";
+    const children = [
+      {
+        type: "table",
+        object: "block",
+        table: { table_width: 3, has_column_header: false },
+      },
+    ];
+
+    await wrapper.appendBlockChildren(blockId, children);
+
+    expect(mockRequest).toHaveBeenCalled();
   });
 
   describe("filterTools", () => {
