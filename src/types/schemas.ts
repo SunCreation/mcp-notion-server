@@ -45,6 +45,7 @@ export const retrieveBlockChildrenTool: Tool = {
       block_id: { type: "string", description: "Block ID." + cid },
       start_cursor: { type: "string", description: "Pagination cursor." },
       page_size: { type: "number", description: "Results per page (max 100)." },
+      max_results: { type: "number", description: "Auto-paginate to collect up to N results total." },
       format: formatParameter,
     },
     required: ["block_id"],
@@ -135,6 +136,7 @@ export const listAllUsersTool: Tool = {
     properties: {
       start_cursor: { type: "string", description: "Pagination cursor." },
       page_size: { type: "number", description: "Max results (max 100)." },
+      max_results: { type: "number", description: "Auto-paginate to collect up to N results total." },
       format: formatParameter,
     },
   },
@@ -159,10 +161,8 @@ export const retrieveBotUserTool: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      random_string: { type: "string", description: "Dummy parameter." },
       format: formatParameter,
     },
-    required: ["random_string"],
   },
 };
 
@@ -204,6 +204,7 @@ export const queryDatabaseTool: Tool = {
       },
       start_cursor: { type: "string", description: "Pagination cursor." },
       page_size: { type: "number", description: "Results per page (max 100)." },
+      max_results: { type: "number", description: "Auto-paginate to collect up to N results total." },
       format: formatParameter,
     },
     required: ["database_id"],
@@ -314,7 +315,57 @@ export const searchTool: Tool = {
       },
       start_cursor: { type: "string", description: "Pagination cursor." },
       page_size: { type: "number", description: "Max results (max 100)." },
+      max_results: { type: "number", description: "Auto-paginate to collect up to N results total." },
       format: formatParameter,
     },
+  },
+};
+
+export const tableAddRowTool: Tool = {
+  name: "notion_table_add_row",
+  description: "Add a row to a table block. Cells count must match table_width.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      table_block_id: { type: "string", description: "Table block ID (not page ID)." + cid },
+      cells: {
+        type: "array",
+        description: "Array of cells. Each cell is an array of rich text objects.",
+        items: { type: "array", items: { type: "object" } },
+      },
+      format: formatParameter,
+    },
+    required: ["table_block_id", "cells"],
+  },
+};
+
+export const tableDeleteRowTool: Tool = {
+  name: "notion_table_delete_row",
+  description: "Delete a row from a table block by its row block ID.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      row_block_id: { type: "string", description: "table_row block ID to delete." + cid },
+      format: formatParameter,
+    },
+    required: ["row_block_id"],
+  },
+};
+
+export const tableUpdateCellsTool: Tool = {
+  name: "notion_table_update_cells",
+  description: "Update all cells in a table row. Replaces entire row content (Notion API limitation — no single-cell update).",
+  inputSchema: {
+    type: "object",
+    properties: {
+      row_block_id: { type: "string", description: "table_row block ID to update." + cid },
+      cells: {
+        type: "array",
+        description: "Full array of cells for the row. Each cell is an array of rich text objects.",
+        items: { type: "array", items: { type: "object" } },
+      },
+      format: formatParameter,
+    },
+    required: ["row_block_id", "cells"],
   },
 };

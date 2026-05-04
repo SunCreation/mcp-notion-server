@@ -318,7 +318,7 @@ export const blockObjectSchema = {
           },
         },
       },
-      required: ["table_width", "has_column_header", "children"],
+      required: ["table_width", "has_column_header"],
     },
   },
   required: ["object", "type"],

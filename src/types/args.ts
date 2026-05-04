@@ -21,6 +21,7 @@ export interface RetrieveBlockChildrenArgs {
   block_id: string;
   start_cursor?: string;
   page_size?: number;
+  max_results?: number;
   format?: "json" | "markdown";
 }
 
@@ -58,6 +59,7 @@ export interface UpdatePagePropertiesArgs {
 export interface ListAllUsersArgs {
   start_cursor?: string;
   page_size?: number;
+  max_results?: number;
   format?: "json" | "markdown";
 }
 
@@ -67,7 +69,6 @@ export interface RetrieveUserArgs {
 }
 
 export interface RetrieveBotUserArgs {
-  random_string: string;
   format?: "json" | "markdown";
 }
 
@@ -94,6 +95,7 @@ export interface QueryDatabaseArgs {
   }>;
   start_cursor?: string;
   page_size?: number;
+  max_results?: number;
   format?: "json" | "markdown";
 }
 
@@ -141,5 +143,24 @@ export interface SearchArgs {
   };
   start_cursor?: string;
   page_size?: number;
+  max_results?: number;
+  format?: "json" | "markdown";
+}
+
+// Table Helpers
+export interface TableAddRowArgs {
+  table_block_id: string;
+  cells: any[][];
+  format?: "json" | "markdown";
+}
+
+export interface TableDeleteRowArgs {
+  row_block_id: string;
+  format?: "json" | "markdown";
+}
+
+export interface TableUpdateCellsArgs {
+  row_block_id: string;
+  cells: any[][];
   format?: "json" | "markdown";
 }
